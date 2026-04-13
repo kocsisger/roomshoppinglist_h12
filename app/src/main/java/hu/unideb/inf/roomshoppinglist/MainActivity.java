@@ -2,6 +2,9 @@ package hu.unideb.inf.roomshoppinglist;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
 
     ShoppingListDatabase shoppingListDatabase;
 
+    TextView shoppingListTextView;
+    EditText newItemEditText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,31 +34,27 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        shoppingListTextView = findViewById(R.id.shoppingListTextView);
+        newItemEditText = findViewById(R.id.newItemEditText);
+
         shoppingListDatabase = Room.databaseBuilder(this,
                         ShoppingListDatabase.class,
                         "shoppinglist_db")
                 .fallbackToDestructiveMigration(true)
                 .build();
+    }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ShoppingListItem sli = new ShoppingListItem();
-                sli.setId(1);
-                sli.setName("Apfel");
-                shoppingListDatabase.shoppingListDAO().insertListItem(sli);
-            }
+    public void addItem(View view) {
+        new Thread(() -> {
+            ShoppingListItem sli = new ShoppingListItem();
+            sli.setName(newItemEditText.getText().toString());
+            shoppingListDatabase.shoppingListDAO().insertListItem(sli);
+
+            String shlist = shoppingListDatabase.shoppingListDAO().getAllItems().toString();
+            Log.d("CheckDB",
+                    shlist);
+            runOnUiThread(() -> shoppingListTextView.setText(shlist));
+
         }).start();
-
-
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("CheckDB",
-                        shoppingListDatabase.shoppingListDAO().getAllItems().toString());
-            }
-        }).start();
-
     }
 }
