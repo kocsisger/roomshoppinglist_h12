@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.room.Room;
 
 import hu.unideb.inf.roomshoppinglist.databinding.ActivityMainBinding;
@@ -43,10 +44,12 @@ public class MainActivity extends AppCompatActivity {
                 .fallbackToDestructiveMigration(true)
                 .build();
 
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         shoppingListDatabase.shoppingListDAO().getAllItems().observe(
                 this,
                 shoppingListItems ->
-                        binding.shoppingListTextView.setText(shoppingListItems.toString())
+                        binding.recyclerView.setAdapter(new ViewAdapter(shoppingListItems))
         );
     }
 
@@ -60,5 +63,11 @@ public class MainActivity extends AppCompatActivity {
             Log.d("CheckDB", shlist);
             runOnUiThread(() -> binding.shoppingListTextView.setText(shlist));*/
         }).start();
+    }
+
+    public void clearDB(View view) {
+        new Thread(
+                () -> shoppingListDatabase.shoppingListDAO().deleteDB()
+        ).start();
     }
 }
