@@ -65,7 +65,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
+                int deleteIdx = viewHolder.getAbsoluteAdapterPosition();
+                ShoppingListItem toDelete = ((ViewAdapter)binding.recyclerView.getAdapter()).getItemAt(deleteIdx);
+                new Thread(
+                        () -> shoppingListDatabase.shoppingListDAO().deleteListItem(toDelete)
+                ).start();
             }
         });
         itemTouchHelper.attachToRecyclerView(binding.recyclerView);
